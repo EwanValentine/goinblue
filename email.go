@@ -32,3 +32,12 @@ type Attachment map[string]string
 
 // This is here for documentation purpose
 type AttachmentUrl []string
+
+// User object
+type User struct {
+	Email        string            `json:"email"`
+	Attributes   map[string]string `json:"attributes"`
+	ListId       []string          `json:"listid"`
+	ListIdUnlink []string          `json:"listid_unlink"`
+	Headers      map[string]string `json:"headers"`
+}

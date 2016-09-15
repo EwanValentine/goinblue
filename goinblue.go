@@ -71,7 +71,14 @@ func (g *Goinblue) SendEmail(email *Email) (*Response, error) {
 
 	urlStr := g.BaseUrl + g.EmailUrl
 
-	res, err := g.sendMessage(g.Method, urlStr, email.Headers, ioutil.NopCloser(body), body.Len())
+	res, err := g.sendMessage(
+		g.Method,
+		urlStr,
+		email.Headers,
+		ioutil.NopCloser(body),
+		body.Len(),
+	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -133,6 +140,57 @@ func (g *Goinblue) SendEmailTemplate(emailTemplate *EmailTemplate) (*Response, e
 
 	resp := &Response{}
 	err = json.Unmarshal(rawResBody, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (g *Goinblue) AddUserToCampaign(user *User) (*Response, error) {
+	body := &bytes.Buffer{}
+	defer body.Reset()
+
+	encoder := json.NewEncoder(body)
+	err := encoder.Encode(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Form correct url
+	urlStr := g.BaseUrl + g.EmailUrl
+
+	res, err := g.sendMessage(
+		g.Method,
+		urlStr,
+		user.Headers,
+		ioutil.NopCloser(body),
+		body.Len(),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		io.Copy(ioutil.Discard, res.Body)
+		res.Body.Close()
+	}()
+
+	rawResBody, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode >= 400 {
+		return nil, fmt.Errorf("Failed to update campaign: %s", res.Status)
+	}
+
+	resp := &Response{}
+	err = json.Unmarshal(rawResBody, resp)
+
 	if err != nil {
 		return nil, err
 	}
