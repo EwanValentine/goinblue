@@ -159,7 +159,7 @@ func (g *Goinblue) AddUserToCampaign(user *User) (*Response, error) {
 	}
 
 	// Form correct url
-	urlStr := g.BaseUrl + g.EmailUrl
+	urlStr := g.BaseUrl + "/user/createdituser"
 
 	res, err := g.sendMessage(
 		g.Method,
